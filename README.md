@@ -1,6 +1,6 @@
-# Fitness Buddy
+# Verdict
 
-Daily coaching app that reads your actual nutrition data and gives real, honest feedback.
+Daily nutrition coaching app. Real feedback, no fluff.
 
 ## Stack
 

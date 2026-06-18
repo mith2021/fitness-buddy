@@ -1,0 +1,79 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  background: #1a2332;
+  color: #ffffff;
+}
+
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: Georgia, serif;
+  font-weight: 700;
+}
+
+h1 {
+  font-size: 24px;
+}
+
+input, button, textarea, select {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+.card {
+  background: #252f3d;
+  border: 1px solid #374151;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.btn-primary {
+  background: #3b82f6;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 24px;
+  font-weight: 500;
+  transition: background 200ms ease;
+}
+
+.btn-primary:hover {
+  background: #2563eb;
+}
+
+.input-field {
+  background: #1a2332;
+  border: 1px solid #374151;
+  color: #ffffff;
+  padding: 10px 12px;
+  border-radius: 8px;
+  transition: border-color 200ms ease;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.text-secondary {
+  color: #a0aec0;
+}

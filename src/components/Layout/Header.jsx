@@ -1,14 +1,21 @@
-export default function Header({ user, onLogout }) {
+export default function Header({ user, onLogout, onSettings }) {
   return (
-    <header className="bg-bg-secondary border-b border-gray-700 py-4 px-6">
-      <div className="max-w-4xl mx-auto flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-white font-heading">Verdict</h1>
+    <header style={{ background: '#252f3d', borderBottom: '1px solid #374151' }} className="py-4 px-6">
+      <div className="max-w-lg mx-auto flex justify-between items-center">
+        <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700 }} className="text-white">
+          Verdict
+        </h1>
         {user && (
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-secondary">{user.email}</span>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={onSettings}
+              className="text-sm text-secondary hover:text-white"
+            >
+              ⚙
+            </button>
             <button
               onClick={onLogout}
-              className="text-sm text-accent-primary hover:text-blue-400"
+              className="text-sm text-secondary hover:text-white"
             >
               Logout
             </button>

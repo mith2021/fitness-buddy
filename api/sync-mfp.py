@@ -15,21 +15,52 @@ MFP_BASE = "https://www.myfitnesspal.com"
 
 
 def mfp_login(username: str, password: str) -> httpx.Client:
-    client = httpx.Client(follow_redirects=True, timeout=30)
+    client = httpx.Client(
+        follow_redirects=True,
+        timeout=30,
+        headers={
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Accept-Encoding": "gzip, deflate, br",
+            "Cache-Control": "max-age=0",
+            "Sec-Ch-Ua": '"Google Chrome";v="125", "Chromium";v="125", "Not.A/Brand";v="24"',
+            "Sec-Ch-Ua-Mobile": "?0",
+            "Sec-Ch-Ua-Platform": '"Windows"',
+            "Sec-Fetch-Dest": "document",
+            "Sec-Fetch-Mode": "navigate",
+            "Sec-Fetch-Site": "none",
+            "Sec-Fetch-User": "?1",
+            "Upgrade-Insecure-Requests": "1",
+        }
+    )
 
-    # Get login page for CSRF token
     r = client.get(f"{MFP_BASE}/user/login")
     soup = BeautifulSoup(r.text, "html.parser")
-    token = soup.find("input", {"name": "authenticity_token"})
-    if not token:
-        raise Exception("Could not find MFP CSRF token")
+    token_el = soup.find("input", {"name": "authenticity_token"})
+    csrf_value = token_el["value"] if token_el else None
+    if not csrf_value:
+        meta = soup.find("meta", {"name": "csrf-token"})
+        csrf_value = meta["content"] if meta else None
+    if not csrf_value:
+        raise Exception(f"Could not find MFP CSRF token (status={r.status_code}, url={r.url})")
 
-    # Login
-    r = client.post(f"{MFP_BASE}/user/login", data={
-        "user[email]": username,
-        "user[password]": password,
-        "authenticity_token": token["value"],
-    })
+    r = client.post(
+        f"{MFP_BASE}/user/login",
+        data={
+            "user[email]": username,
+            "user[password]": password,
+            "authenticity_token": csrf_value,
+        },
+        headers={
+            "Referer": f"{MFP_BASE}/user/login",
+            "Origin": MFP_BASE,
+            "Sec-Fetch-Site": "same-origin",
+            "Sec-Fetch-Mode": "navigate",
+            "Sec-Fetch-Dest": "document",
+            "Content-Type": "application/x-www-form-urlencoded",
+        },
+    )
 
     if "Invalid" in r.text or r.url.path == "/user/login":
         raise Exception("MFP login failed — check credentials")

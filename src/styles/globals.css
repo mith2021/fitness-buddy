@@ -53,6 +53,7 @@ button {
   border: 1px solid #2e4a64;
   border-radius: 16px;
   padding: 24px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
 }
 
 .btn-primary {

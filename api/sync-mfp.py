@@ -46,7 +46,10 @@ def parse_diary(client: httpx.Client, username: str, today: date) -> list:
     meal_sections = soup.select("table.main-title-2")
 
     for section in meal_sections:
-        meal_name = section.select_one(".main-title-2").get_text(strip=True)
+        # The meal category heading is in the first td of the header row,
+        # not a nested .main-title-2 child (that would be a self-reference).
+        heading = section.select_one("td.first.alt") or section.select_one("th")
+        meal_name = heading.get_text(strip=True) if heading else "Unknown"
         rows = section.find_next_sibling("tbody")
         if not rows:
             continue
@@ -98,7 +101,7 @@ def sync_user(supabase, user_id: str, mfp_username: str, mfp_password: str) -> d
 
 
 class handler(BaseHTTPRequestHandler):
-    def do_GET(self):
+    def do_POST(self):
         auth = self.headers.get("authorization", "")
         if CRON_SECRET and auth != f"Bearer {CRON_SECRET}":
             self.send_response(401)

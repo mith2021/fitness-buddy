@@ -49,8 +49,7 @@ export default function App() {
       <main className="container-app py-4 space-y-3" style={{ paddingBottom: 'max(2rem, env(safe-area-inset-bottom))' }}>
         {noMfpCreds && (
           <div
-            className="card cursor-pointer border-l-4 border-l-green-500 hover:border-green-500 transition-colors"
-            style={{ borderColor: '#2a2a2a', borderLeftColor: '#22c55e' }}
+            className="card cursor-pointer hover:border-green-500 transition-colors"
             onClick={() => setShowSettings(true)}
           >
             <p className="text-white text-lg font-semibold">Connect MyFitnessPal</p>

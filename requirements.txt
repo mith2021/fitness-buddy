@@ -1,2 +1,2 @@
-myfitnesspal==1.23.0
+myfitnesspal==2.1.2
 supabase==2.3.0

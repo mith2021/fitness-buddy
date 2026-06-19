@@ -7,7 +7,6 @@ export default function SettingsForm({ prefs, onSave, onClose }) {
   const [form, setForm] = useState({
     mfp_username: prefs.mfp_username || '',
     mfp_password: prefs.mfp_password || '',
-    daily_goal_calories: prefs.daily_goal_calories || 2000,
     dietary_notes: prefs.dietary_notes || '',
   });
   const [saving, setSaving] = useState(false);
@@ -26,7 +25,7 @@ export default function SettingsForm({ prefs, onSave, onClose }) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-cron-secret': import.meta.env.VITE_CRON_SECRET || '',
+          'Authorization': `Bearer ${import.meta.env.VITE_CRON_SECRET || ''}`,
         },
       });
       const text = await res.text();
@@ -89,25 +88,15 @@ export default function SettingsForm({ prefs, onSave, onClose }) {
           </div>
 
           <div>
-            <p className="text-xs text-secondary mb-3 uppercase tracking-wider">Goals</p>
-            <div className="space-y-3">
-              <Input
-                label="Daily Calorie Goal"
-                type="number"
-                value={form.daily_goal_calories}
-                onChange={set('daily_goal_calories')}
-              />
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Notes for Coach</label>
-                <textarea
-                  value={form.dietary_notes}
-                  onChange={set('dietary_notes')}
-                  placeholder="e.g. trying to bulk, avoid dairy..."
-                  rows={3}
-                  className="input-field w-full resize-none"
-                />
-              </div>
-            </div>
+            <p className="text-xs text-secondary mb-3 uppercase tracking-wider">Coach Notes</p>
+            <textarea
+              value={form.dietary_notes}
+              onChange={set('dietary_notes')}
+              placeholder="e.g. trying to bulk, avoid dairy, cut weight for summer..."
+              rows={3}
+              className="input-field w-full resize-none"
+            />
+            <p className="text-xs text-secondary mt-1">AI coach uses this as context</p>
           </div>
         </div>
 

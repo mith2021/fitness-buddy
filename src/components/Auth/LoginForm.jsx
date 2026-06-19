@@ -67,7 +67,7 @@ export default function LoginForm({ onSubmit, isLoading = false }) {
           <button
             type="button"
             onClick={() => setMode(mode === 'login' ? 'signup' : 'login')}
-            className="text-sm text-green-400 hover:text-green-300"
+            className="text-sm text-green-400 hover:text-green-300 min-h-[44px] px-4"
           >
             {mode === 'login' ? 'Need an account?' : 'Already have an account?'}
           </button>

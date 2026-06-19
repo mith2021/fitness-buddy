@@ -9,22 +9,16 @@ from supabase import create_client
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_KEY")
-SUPABASE_ANON_KEY = os.environ.get("SUPABASE_ANON_KEY")
 
 MFP_BASE = "https://www.myfitnesspal.com"
 
 
 def get_user_from_jwt(token: str):
-    """Validate Supabase JWT and return user_id."""
-    import urllib.request
-    req = urllib.request.Request(
-        f"{SUPABASE_URL}/auth/v1/user",
-        headers={"Authorization": f"Bearer {token}", "apikey": SUPABASE_ANON_KEY},
-    )
+    """Validate Supabase JWT and return user_id using service client."""
     try:
-        with urllib.request.urlopen(req, timeout=10) as res:
-            data = json.loads(res.read())
-            return data.get("id")
+        sb = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+        resp = sb.auth.get_user(token)
+        return resp.user.id if resp.user else None
     except Exception:
         return None
 

@@ -4,12 +4,12 @@ export default function DailyTotal({ totalCalories, goalCalories, totalProtein, 
   const overBudget = remaining < 0;
 
   return (
-    <div className="card mb-4">
+    <div className="card">
       {/* Calorie display */}
       <div className="flex justify-between items-baseline mb-1">
         <div>
-          <span className="text-7xl font-bold text-white leading-none">{totalCalories}</span>
-          <span className="text-gray-400 text-sm ml-2">/ {goalCalories} cal</span>
+          <span className="text-6xl sm:text-7xl font-bold text-white leading-none tabular-nums">{totalCalories}</span>
+          <span className="text-gray-400 text-sm ml-2 tabular-nums">/ {goalCalories} cal</span>
         </div>
         <span className={`text-sm font-semibold ${overBudget ? 'text-orange-400' : 'text-green-400'}`}>
           {overBudget ? `${Math.abs(remaining)} over` : `${remaining} left`}

@@ -12,14 +12,40 @@ export default function SettingsForm({ prefs, onSave, onClose }) {
   });
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState(null);
+  const [syncing, setSyncing] = useState(false);
+  const [syncMsg, setSyncMsg] = useState(null);
 
   const set = (key) => (e) => setForm(f => ({ ...f, [key]: e.target.value }));
 
+  const handleSync = async () => {
+    setSyncing(true);
+    setSyncMsg(null);
+    try {
+      const res = await fetch('/api/sync-mfp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-cron-secret': import.meta.env.VITE_CRON_SECRET || '',
+        },
+      });
+      const text = await res.text();
+      setSyncMsg(res.ok ? 'Synced! Refresh to see meals.' : `Error: ${text}`);
+    } catch (e) {
+      setSyncMsg(`Error: ${e.message}`);
+    }
+    setSyncing(false);
+  };
+
   const handleSave = async () => {
     setSaving(true);
-    const { error } = await onSave(form);
+    setError(null);
+    const { error: saveError } = await onSave(form);
     setSaving(false);
-    if (!error) {
+    if (saveError) {
+      console.error('Save failed:', saveError);
+      setError(saveError.message || 'Save failed');
+    } else {
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     }
@@ -50,7 +76,15 @@ export default function SettingsForm({ prefs, onSave, onClose }) {
                 onChange={set('mfp_password')}
                 placeholder="••••••••"
               />
-              <p className="text-xs text-secondary">Syncs every 15 min. Disable 2FA on MFP.</p>
+              <p className="text-xs text-secondary">Auto-syncs every 2h. Disable 2FA on MFP.</p>
+              <button
+                onClick={handleSync}
+                disabled={syncing}
+                className="btn-primary text-sm px-4 py-2 w-full"
+              >
+                {syncing ? 'Syncing...' : 'Sync Now'}
+              </button>
+              {syncMsg && <p className={`text-xs ${syncMsg.startsWith('Error') ? 'text-red-400' : 'text-[#00a0d2]'}`}>{syncMsg}</p>}
             </div>
           </div>
 
@@ -77,6 +111,7 @@ export default function SettingsForm({ prefs, onSave, onClose }) {
           </div>
         </div>
 
+        {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
         <Button onClick={handleSave} disabled={saving} className="w-full mt-6">
           {saving ? 'Saving...' : saved ? 'Saved ✓' : 'Save'}
         </Button>

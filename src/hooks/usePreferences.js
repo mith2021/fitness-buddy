@@ -27,10 +27,15 @@ export function usePreferences(userId) {
   }, [userId]);
 
   const save = async (updates) => {
-    const merged = { ...prefs, ...updates, user_id: userId, id: prefs.id || crypto.randomUUID(), updated_at: new Date().toISOString() };
-    const { error } = await supabase
-      .from('user_preferences')
-      .upsert(merged, { onConflict: 'user_id' });
+    const merged = { ...prefs, ...updates, user_id: userId, updated_at: new Date().toISOString() };
+    let error;
+    if (prefs.id) {
+      ({ error } = await supabase.from('user_preferences').update(merged).eq('id', prefs.id));
+    } else {
+      const { data, error: insertError } = await supabase.from('user_preferences').insert(merged).select().single();
+      error = insertError;
+      if (!insertError && data) merged.id = data.id;
+    }
     if (!error) setPrefs(merged);
     return { error };
   };

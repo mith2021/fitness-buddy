@@ -2,7 +2,7 @@ export default function Header({ user, onLogout, onSettings }) {
   return (
     <header className="sticky top-0 z-40 bg-[#1a2b3c] border-b border-[#2a3d52] py-4">
       <div className="container-app flex justify-between items-center">
-        <h1 className="text-white font-bold text-xl tracking-tight" style={{ fontFamily: 'Georgia, serif' }}>
+        <h1 className="text-white font-bold text-3xl tracking-tight" style={{ fontFamily: 'Georgia, serif' }}>
           Verdict
         </h1>
         {user && (

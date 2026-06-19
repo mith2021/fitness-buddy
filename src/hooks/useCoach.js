@@ -24,6 +24,7 @@ export function useCoach(userId, logs, prefs) {
   // Trigger coach when new meals appear
   useEffect(() => {
     if (!userId || !prefs || logs.length === 0) return;
+    if (!prefs.mfp_username) return;
     if (logs.length <= prevLogCount.current) return;
     prevLogCount.current = logs.length;
 
@@ -45,7 +46,7 @@ export function useCoach(userId, logs, prefs) {
     };
 
     trigger();
-  }, [logs.length, userId, prefs]);
+  }, [logs.length, userId, prefs?.daily_goal_calories, prefs?.dietary_notes, prefs?.mfp_username]);
 
   return { messages, loading };
 }

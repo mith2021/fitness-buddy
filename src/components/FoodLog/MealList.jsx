@@ -15,7 +15,7 @@ export default function MealList({ logs }) {
     return (
       <div className="card text-center py-8">
         <p className="text-secondary">No meals synced yet.</p>
-        <p className="text-xs text-secondary mt-1">MFP syncs every 15 minutes.</p>
+        <p className="text-xs text-secondary mt-1">MFP syncs every 2 hours.</p>
       </div>
     );
   }

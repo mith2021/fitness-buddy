@@ -27,7 +27,16 @@ def get_user_from_jwt(token: str):
 
 
 def mfp_login(username: str, password: str) -> httpx.Client:
-    client = httpx.Client(follow_redirects=True, timeout=30)
+    client = httpx.Client(
+        follow_redirects=True,
+        timeout=30,
+        headers={
+            "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Accept-Encoding": "gzip, deflate, br",
+        }
+    )
     r = client.get(f"{MFP_BASE}/user/login")
     soup = BeautifulSoup(r.text, "html.parser")
     token = soup.find("input", {"name": "authenticity_token"})

@@ -1,24 +1,20 @@
 import { useState } from 'react';
 import { useAuth } from './hooks/useAuth';
-import { useFoodLog } from './hooks/useFoodLog';
-import { usePreferences } from './hooks/usePreferences';
-import { useCoach } from './hooks/useCoach';
 import LoginForm from './components/Auth/LoginForm';
-import SettingsForm from './components/Auth/SettingsForm';
-import Header from './components/Layout/Header';
-import DailyTotal from './components/FoodLog/DailyTotal';
-import MealList from './components/FoodLog/MealList';
-import CoachFeed from './components/Coach/CoachFeed';
+import Header from './components/Header';
+import WeekStrip from './components/WeekStrip';
+import CaloriesCard from './components/CaloriesCard';
+import MacrosCard from './components/MacrosCard';
+import DiarySection from './components/DiarySection';
+import BottomNav from './components/BottomNav';
+import FAB from './components/FAB';
 import './styles/globals.css';
+import './styles/tokens.css';
 
 export default function App() {
   const { user, loading, login, signup, logout } = useAuth();
   const [authLoading, setAuthLoading] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
-
-  const { logs, totalCalories, totalProtein, totalCarbs, totalFat } = useFoodLog(user?.id);
-  const { prefs, save: savePrefs } = usePreferences(user?.id);
-  const { messages, loading: coachLoading } = useCoach(user?.id, logs, prefs);
+  const [activeNav, setActiveNav] = useState('today');
 
   const handleAuth = async (email, password, mode) => {
     setAuthLoading(true);
@@ -32,55 +28,46 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#13151c]">
-        <p className="text-white">Loading...</p>
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'var(--bg-base)',
+      }}>
+        <p style={{ color: 'var(--text-secondary)' }}>Loading…</p>
       </div>
     );
   }
 
   if (!user) return <LoginForm onSubmit={handleAuth} isLoading={authLoading} />;
 
-  const noMfpCreds = !prefs.mfp_username || !prefs.mfp_password;
-
   return (
-    <div className="min-h-screen bg-[#13151c]">
-      <Header user={user} onLogout={logout} onSettings={() => setShowSettings(true)} />
+    <div style={{
+      minHeight: '100vh',
+      background: 'var(--bg-base)',
+      fontFamily: 'var(--font-body)',
+    }}>
+      {/* Centered mobile shell */}
+      <div style={{ maxWidth: 390, margin: '0 auto', position: 'relative' }}>
+        <Header onLogout={logout} />
+        <WeekStrip />
 
-      <main className="container-app py-5 space-y-4" style={{ paddingBottom: 'max(2rem, env(safe-area-inset-bottom))' }}>
-        {noMfpCreds && (
-          <div
-            className="card cursor-pointer border-l-4 border-l-green-500 hover:border-green-500 transition-colors"
-            style={{ borderColor: '#2a2a2a', borderLeftColor: '#22c55e' }}
-            onClick={() => setShowSettings(true)}
-          >
-            <p className="text-white text-lg font-semibold">Connect MyFitnessPal</p>
-            <p className="text-gray-400 text-sm mt-1">Sync your meals automatically every 2 hours</p>
-            <button className="mt-3 btn-primary text-sm px-4 py-2 rounded-full">
-              Connect Now →
-            </button>
-          </div>
-        )}
+        <main style={{
+          padding: 'var(--sp-3) var(--sp-4)',
+          paddingBottom: 'calc(80px + var(--sp-6))',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 'var(--sp-3)',
+        }}>
+          <CaloriesCard consumed={1544} goal={2401} />
+          <MacrosCard />
+          <DiarySection />
+        </main>
 
-        <DailyTotal
-          totalCalories={totalCalories}
-          goalCalories={prefs.daily_goal_calories || 2000}
-          totalProtein={totalProtein}
-          totalCarbs={totalCarbs}
-          totalFat={totalFat}
-        />
-
-        <CoachFeed messages={messages} loading={coachLoading} />
-
-        <MealList logs={logs} />
-      </main>
-
-      {showSettings && (
-        <SettingsForm
-          prefs={prefs}
-          onSave={savePrefs}
-          onClose={() => setShowSettings(false)}
-        />
-      )}
+        <BottomNav active={activeNav} onChange={setActiveNav} />
+        <FAB />
+      </div>
     </div>
   );
 }

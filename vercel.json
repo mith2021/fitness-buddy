@@ -1,10 +1,4 @@
 {
-  "crons": [
-    {
-      "path": "/api/sync-mfp",
-      "schedule": "0 */2 * * *"
-    }
-  ],
   "functions": {
     "api/sync-mfp.py": {
       "runtime": "python3.12"

@@ -1,6 +1,6 @@
 export default function Header({ user, onLogout, onSettings }) {
   return (
-    <header className="bg-[#1a1a1a] border-b border-[#2a2a2a] py-4">
+    <header className="sticky top-0 z-40 bg-[#1a1a1a] border-b border-[#2a2a2a] py-4">
       <div className="container-app flex justify-between items-center">
         <h1 className="text-white font-bold text-xl tracking-tight" style={{ fontFamily: 'Georgia, serif' }}>
           Verdict

@@ -46,7 +46,7 @@ export default function App() {
     <div className="min-h-screen bg-[#0f0f0f]">
       <Header user={user} onLogout={logout} onSettings={() => setShowSettings(true)} />
 
-      <main className="container-app py-6 space-y-3">
+      <main className="container-app py-4 space-y-3" style={{ paddingBottom: 'max(2rem, env(safe-area-inset-bottom))' }}>
         {noMfpCreds && (
           <div
             className="card cursor-pointer border-l-4 border-l-green-500 hover:border-green-500 transition-colors"

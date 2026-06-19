@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { supabase } from '../../lib/supabase';
 import Input from '../UI/Input';
 import Button from '../UI/Button';
 import Card from '../UI/Card';
@@ -21,15 +22,16 @@ export default function SettingsForm({ prefs, onSave, onClose }) {
     setSyncing(true);
     setSyncMsg(null);
     try {
-      const res = await fetch('/api/sync-mfp', {
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch('/api/sync-user', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_CRON_SECRET || ''}`,
+          'Authorization': `Bearer ${session?.access_token || ''}`,
         },
       });
-      const text = await res.text();
-      setSyncMsg(res.ok ? 'Synced! Refresh to see meals.' : `Error: ${text}`);
+      const json = await res.json();
+      setSyncMsg(res.ok ? `Synced ${json.synced} items! Refresh to see meals.` : `Error: ${json.error}`);
     } catch (e) {
       setSyncMsg(`Error: ${e.message}`);
     }

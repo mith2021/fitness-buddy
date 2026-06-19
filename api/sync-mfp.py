@@ -15,56 +15,49 @@ MFP_BASE = "https://www.myfitnesspal.com"
 
 
 def mfp_login(username: str, password: str) -> httpx.Client:
+    """Login via MFP's NextAuth flow."""
+    ua = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
     client = httpx.Client(
         follow_redirects=True,
         timeout=30,
         headers={
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+            "User-Agent": ua,
             "Accept-Language": "en-US,en;q=0.9",
             "Accept-Encoding": "gzip, deflate, br",
-            "Cache-Control": "max-age=0",
-            "Sec-Ch-Ua": '"Google Chrome";v="125", "Chromium";v="125", "Not.A/Brand";v="24"',
-            "Sec-Ch-Ua-Mobile": "?0",
-            "Sec-Ch-Ua-Platform": '"Windows"',
-            "Sec-Fetch-Dest": "document",
-            "Sec-Fetch-Mode": "navigate",
-            "Sec-Fetch-Site": "none",
-            "Sec-Fetch-User": "?1",
-            "Upgrade-Insecure-Requests": "1",
         }
     )
+    # Step 1: get NextAuth CSRF token
+    r = client.get(
+        f"{MFP_BASE}/api/auth/csrf",
+        headers={"Accept": "application/json"},
+    )
+    if r.status_code != 200:
+        raise Exception(f"MFP CSRF fetch failed (status={r.status_code})")
+    csrf_token = r.json().get("csrfToken")
+    if not csrf_token:
+        raise Exception("MFP CSRF token missing from response")
 
-    r = client.get(f"{MFP_BASE}/user/login")
-    soup = BeautifulSoup(r.text, "html.parser")
-    token_el = soup.find("input", {"name": "authenticity_token"})
-    csrf_value = token_el["value"] if token_el else None
-    if not csrf_value:
-        meta = soup.find("meta", {"name": "csrf-token"})
-        csrf_value = meta["content"] if meta else None
-    if not csrf_value:
-        raise Exception(f"Could not find MFP CSRF token (status={r.status_code}, url={r.url})")
-
+    # Step 2: submit credentials to NextAuth callback
     r = client.post(
-        f"{MFP_BASE}/user/login",
+        f"{MFP_BASE}/api/auth/callback/credentials",
         data={
-            "user[email]": username,
-            "user[password]": password,
-            "authenticity_token": csrf_value,
+            "csrfToken": csrf_token,
+            "email": username,
+            "password": password,
+            "redirect": "false",
+            "callbackUrl": f"{MFP_BASE}/",
+            "json": "true",
         },
         headers={
-            "Referer": f"{MFP_BASE}/user/login",
-            "Origin": MFP_BASE,
-            "Sec-Fetch-Site": "same-origin",
-            "Sec-Fetch-Mode": "navigate",
-            "Sec-Fetch-Dest": "document",
+            "Accept": "application/json",
             "Content-Type": "application/x-www-form-urlencoded",
+            "Referer": f"{MFP_BASE}/account/login",
+            "Origin": MFP_BASE,
         },
     )
-
-    if "Invalid" in r.text or r.url.path == "/user/login":
-        raise Exception("MFP login failed — check credentials")
-
+    data = r.json() if r.headers.get("content-type", "").startswith("application/json") else {}
+    if r.status_code not in (200, 302) or data.get("error"):
+        raise Exception(f"MFP login failed — check credentials (error={data.get('error', r.status_code)})")
     return client
 
 

@@ -24,7 +24,7 @@ export default function MealList({ logs }) {
   const categories = [...CATEGORY_ORDER, ...Object.keys(grouped).filter(k => !CATEGORY_ORDER.includes(k))];
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-8">
       {categories.filter(c => grouped[c]).map(category => {
         const categoryCalories = grouped[category].reduce((s, l) => s + l.calories, 0);
         return (

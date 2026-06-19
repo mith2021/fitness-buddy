@@ -30,8 +30,14 @@ export default function SettingsForm({ prefs, onSave, onClose }) {
           'Authorization': `Bearer ${session?.access_token || ''}`,
         },
       });
-      const json = await res.json();
-      setSyncMsg(res.ok ? `Synced ${json.synced} items! Refresh to see meals.` : `Error: ${json.error}`);
+      const text = await res.text();
+      let json;
+      try { json = JSON.parse(text); } catch { json = null; }
+      if (res.ok && json?.ok) {
+        setSyncMsg(`Synced ${json.synced} items! Refresh to see meals.`);
+      } else {
+        setSyncMsg(`Error: ${json?.error || text.slice(0, 200)}`);
+      }
     } catch (e) {
       setSyncMsg(`Error: ${e.message}`);
     }

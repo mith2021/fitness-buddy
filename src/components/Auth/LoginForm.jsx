@@ -27,9 +27,14 @@ export default function LoginForm({ onSubmit, isLoading = false }) {
 
   return (
     <div className="min-h-screen bg-[#0f0f0f] flex items-center justify-center px-4 py-8">
-      <Card className="w-full max-w-md">
-        <h2 className="text-2xl font-bold text-white mb-6 text-center">
-          {mode === 'login' ? 'Login' : 'Sign Up'}
+      <div className="w-full max-w-md">
+        <div className="text-center mb-6">
+          <h1 className="text-3xl font-bold text-white">Verdict</h1>
+          <p className="text-gray-400 text-sm mt-1">Your daily nutrition coach</p>
+        </div>
+      <Card className="w-full">
+        <h2 className="text-xl font-bold text-white mb-6 text-center">
+          {mode === 'login' ? 'Sign in' : 'Create account'}
         </h2>
 
         {error && <div className="bg-red-900 text-red-100 p-3 rounded mb-4">{error}</div>}
@@ -68,6 +73,7 @@ export default function LoginForm({ onSubmit, isLoading = false }) {
           </button>
         </div>
       </Card>
+      </div>
     </div>
   );
 }

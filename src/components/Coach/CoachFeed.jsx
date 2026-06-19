@@ -12,7 +12,7 @@ export default function CoachFeed({ messages, loading }) {
 
   return (
     <div className="card">
-      <h3 className="text-sm font-semibold text-secondary uppercase tracking-wider mb-3">Coach</h3>
+      <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Coach</h3>
       <div className="space-y-2 max-h-48 overflow-y-auto">
         <AnimatePresence>
           {messages.map(msg => (
@@ -21,14 +21,14 @@ export default function CoachFeed({ messages, loading }) {
               initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.2, ease: 'easeOut' }}
-              className="text-sm text-white leading-relaxed"
+              className="text-sm text-white leading-relaxed bg-[#0f0f0f] rounded-lg px-3 py-2 border-l-2 border-green-500"
             >
               {msg.coach_message}
             </motion.div>
           ))}
         </AnimatePresence>
         {loading && (
-          <div className="text-sm text-secondary animate-pulse">Thinking...</div>
+          <div className="text-sm text-gray-400 animate-pulse px-3 py-2">Thinking...</div>
         )}
         <div ref={bottomRef} />
       </div>

@@ -32,7 +32,7 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#1a2332' }}>
+      <div className="min-h-screen flex items-center justify-center bg-[#0f0f0f]">
         <p className="text-white">Loading...</p>
       </div>
     );
@@ -43,17 +43,21 @@ export default function App() {
   const noMfpCreds = !prefs.mfp_username || !prefs.mfp_password;
 
   return (
-    <div className="min-h-screen" style={{ background: '#1a2332' }}>
+    <div className="min-h-screen bg-[#0f0f0f]">
       <Header user={user} onLogout={logout} onSettings={() => setShowSettings(true)} />
 
-      <main className="max-w-lg mx-auto px-4 py-6 space-y-3">
+      <main className="container-app py-6 space-y-3">
         {noMfpCreds && (
           <div
-            className="card text-center cursor-pointer border-blue-500/50 hover:border-blue-500"
+            className="card cursor-pointer border-l-4 border-l-green-500 hover:border-green-500 transition-colors"
+            style={{ borderColor: '#2a2a2a', borderLeftColor: '#22c55e' }}
             onClick={() => setShowSettings(true)}
           >
-            <p className="text-white font-medium">Connect MyFitnessPal →</p>
-            <p className="text-secondary text-sm mt-1">Add credentials to start syncing</p>
+            <p className="text-white text-lg font-semibold">Connect MyFitnessPal</p>
+            <p className="text-gray-400 text-sm mt-1">Sync your meals automatically every 2 hours</p>
+            <button className="mt-3 btn-primary text-sm px-4 py-2 rounded-full">
+              Connect Now →
+            </button>
           </div>
         )}
 

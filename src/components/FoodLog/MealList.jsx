@@ -41,9 +41,9 @@ export default function MealList({ logs }) {
                 >
                   <span className="text-sm text-white">{log.meal_name}</span>
                   <div className="flex items-center gap-3 text-xs">
-                    <span className="text-yellow-400">{log.protein}p</span>
-                    <span className="text-cyan-400">{log.carbs}c</span>
-                    <span className="text-purple-400">{log.fat}f</span>
+                    <span className="text-green-400">{log.protein}p</span>
+                    <span className="text-green-300">{log.carbs}c</span>
+                    <span className="text-green-200">{log.fat}f</span>
                     <span className="text-white font-semibold w-12 text-right">{log.calories}</span>
                   </div>
                 </div>

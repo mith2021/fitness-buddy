@@ -21,7 +21,7 @@ export default function CoachFeed({ messages, loading }) {
               initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.2, ease: 'easeOut' }}
-              className="text-sm text-white leading-relaxed bg-[#0f0f0f] rounded-lg px-3 py-2 border-l-2 border-green-500"
+              className="text-sm text-white leading-relaxed bg-[#0f0f0f] rounded-lg px-3 py-2"
             >
               {msg.coach_message}
             </motion.div>

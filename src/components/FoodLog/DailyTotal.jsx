@@ -8,7 +8,7 @@ export default function DailyTotal({ totalCalories, goalCalories, totalProtein, 
       {/* Calorie display */}
       <div className="flex justify-between items-baseline mb-1">
         <div>
-          <span className="text-6xl sm:text-7xl font-bold text-white leading-none tabular-nums">{totalCalories}</span>
+          <span className="text-7xl sm:text-8xl font-bold text-white leading-none tabular-nums">{totalCalories}</span>
           <span className="text-gray-400 text-sm ml-2 tabular-nums">/ {goalCalories} cal</span>
         </div>
         <span className={`text-sm font-semibold ${overBudget ? 'text-orange-400' : 'text-green-400'}`}>
@@ -28,9 +28,9 @@ export default function DailyTotal({ totalCalories, goalCalories, totalProtein, 
 
       {/* Macro breakdown */}
       <div className="grid grid-cols-3 gap-3">
-        <MacroStat label="Protein" value={totalProtein} color="#fbbf24" />
-        <MacroStat label="Carbs" value={totalCarbs} color="#06b6d4" />
-        <MacroStat label="Fat" value={totalFat} color="#a855f7" />
+        <MacroStat label="Protein" value={totalProtein} color="#22c55e" />
+        <MacroStat label="Carbs" value={totalCarbs} color="#4ade80" />
+        <MacroStat label="Fat" value={totalFat} color="#86efac" />
       </div>
     </div>
   );

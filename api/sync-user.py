@@ -14,11 +14,14 @@ MFP_BASE = "https://www.myfitnesspal.com"
 
 
 def get_user_from_jwt(token: str):
-    """Validate Supabase JWT and return user_id using service client."""
+    """Decode JWT payload to extract user_id (sub claim)."""
     try:
-        sb = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
-        resp = sb.auth.get_user(token)
-        return resp.user.id if resp.user else None
+        import base64
+        payload = token.split(".")[1]
+        # Add padding
+        payload += "=" * (4 - len(payload) % 4)
+        data = json.loads(base64.urlsafe_b64decode(payload))
+        return data.get("sub")
     except Exception:
         return None
 

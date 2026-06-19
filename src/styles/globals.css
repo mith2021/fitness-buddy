@@ -7,7 +7,7 @@
 }
 
 html {
-  background: #0f0f0f;
+  background: #13151c;
   color: #ffffff;
 }
 
@@ -48,8 +48,8 @@ button {
 }
 
 .card {
-  background: #1a1a1a;
-  border: 1px solid #2a2a2a;
+  background: #1e2028;
+  border: 1px solid #2a2d38;
   border-radius: 16px;
   padding: 20px;
 }
@@ -68,8 +68,8 @@ button {
 }
 
 .input-field {
-  background: #0f0f0f;
-  border: 1px solid #2a2a2a;
+  background: #13151c;
+  border: 1px solid #2a2d38;
   color: #ffffff;
   padding: 10px 12px;
   border-radius: 8px;
@@ -82,5 +82,5 @@ button {
 }
 
 .text-secondary {
-  color: #9ca3af;
+  color: #8b95a8;
 }

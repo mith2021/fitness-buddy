@@ -32,7 +32,7 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0f0f0f]">
+      <div className="min-h-screen flex items-center justify-center bg-[#13151c]">
         <p className="text-white">Loading...</p>
       </div>
     );
@@ -43,10 +43,10 @@ export default function App() {
   const noMfpCreds = !prefs.mfp_username || !prefs.mfp_password;
 
   return (
-    <div className="min-h-screen bg-[#0f0f0f]">
+    <div className="min-h-screen bg-[#13151c]">
       <Header user={user} onLogout={logout} onSettings={() => setShowSettings(true)} />
 
-      <main className="container-app py-4 space-y-3" style={{ paddingBottom: 'max(2rem, env(safe-area-inset-bottom))' }}>
+      <main className="container-app py-5 space-y-4" style={{ paddingBottom: 'max(2rem, env(safe-area-inset-bottom))' }}>
         {noMfpCreds && (
           <div
             className="card cursor-pointer border-l-4 border-l-green-500 hover:border-green-500 transition-colors"

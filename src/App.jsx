@@ -32,7 +32,7 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0f0f0f]">
+      <div className="min-h-screen flex items-center justify-center bg-[#0d1b2a]">
         <p className="text-white">Loading...</p>
       </div>
     );
@@ -43,13 +43,13 @@ export default function App() {
   const noMfpCreds = !prefs.mfp_username || !prefs.mfp_password;
 
   return (
-    <div className="min-h-screen bg-[#0f0f0f]">
+    <div className="min-h-screen bg-[#0d1b2a]">
       <Header user={user} onLogout={logout} onSettings={() => setShowSettings(true)} />
 
       <main className="container-app py-4 space-y-3" style={{ paddingBottom: 'max(2rem, env(safe-area-inset-bottom))' }}>
         {noMfpCreds && (
           <div
-            className="card cursor-pointer hover:border-green-500 transition-colors"
+            className="card cursor-pointer hover:border-[#00a0d2] transition-colors"
             onClick={() => setShowSettings(true)}
           >
             <p className="text-white text-lg font-semibold">Connect MyFitnessPal</p>

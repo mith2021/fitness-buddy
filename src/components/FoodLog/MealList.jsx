@@ -37,13 +37,13 @@ export default function MealList({ logs }) {
               {grouped[category].map((log, i) => (
                 <div
                   key={log.id}
-                  className={`flex justify-between items-center py-2 ${i < grouped[category].length - 1 ? 'border-b border-[#2a2a2a]' : ''}`}
+                  className={`flex justify-between items-center py-2 ${i < grouped[category].length - 1 ? 'border-b border-[#2a3d52]' : ''}`}
                 >
                   <span className="text-sm text-white">{log.meal_name}</span>
                   <div className="flex items-center gap-3 text-xs">
-                    <span className="text-green-400">{log.protein}p</span>
-                    <span className="text-green-300">{log.carbs}c</span>
-                    <span className="text-green-200">{log.fat}f</span>
+                    <span className="text-[#00a0d2]">{log.protein}p</span>
+                    <span className="text-[#33b5de]">{log.carbs}c</span>
+                    <span className="text-[#66caeb]">{log.fat}f</span>
                     <span className="text-white font-semibold w-12 text-right">{log.calories}</span>
                   </div>
                 </div>

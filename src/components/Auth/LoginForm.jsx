@@ -26,7 +26,7 @@ export default function LoginForm({ onSubmit, isLoading = false }) {
   };
 
   return (
-    <div className="min-h-screen bg-[#0f0f0f] flex items-center justify-center px-4 py-8">
+    <div className="min-h-screen bg-[#0d1b2a] flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-md">
         <div className="text-center mb-6">
           <h1 className="text-3xl font-bold text-white">Verdict</h1>
@@ -67,7 +67,7 @@ export default function LoginForm({ onSubmit, isLoading = false }) {
           <button
             type="button"
             onClick={() => setMode(mode === 'login' ? 'signup' : 'login')}
-            className="text-sm text-green-400 hover:text-green-300 min-h-[44px] px-4"
+            className="text-sm text-[#00a0d2] hover:text-[#33b5de] min-h-[44px] px-4"
           >
             {mode === 'login' ? 'Need an account?' : 'Already have an account?'}
           </button>

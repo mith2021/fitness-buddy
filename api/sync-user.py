@@ -81,6 +81,22 @@ def parse_diary(client: httpx.Client, username: str, today: date) -> list:
     entries = []
     meal_sections = soup.select("table.main-title-2")
 
+    # Diagnostic: no meal tables found. Distinguish auth failure from empty diary
+    # so the surfaced error is actionable instead of a silent "synced 0".
+    if not meal_sections:
+        page_text = r.text.lower()
+        if "/account/login" in page_text or "challenge" in page_text or "log in" in page_text:
+            raise Exception(
+                f"Diary not accessible — session not authenticated "
+                f"(status={r.status_code}, url={r.url}). Login may have silently failed."
+            )
+        # Logged in but no old-style tables: MFP likely changed diary markup.
+        if "__next_data__" in page_text or "data-next-head" in page_text:
+            raise Exception(
+                f"Diary page is now Next.js-rendered — parser selectors are stale "
+                f"(status={r.status_code}). Parser needs updating to new markup."
+            )
+
     for section in meal_sections:
         heading = section.select_one("td.first.alt") or section.select_one("th")
         meal_name = heading.get_text(strip=True) if heading else "Unknown"

@@ -69,6 +69,19 @@ def parse_diary(client: httpx.Client, username: str, today: date) -> list:
     entries = []
     meal_sections = soup.select("table.main-title-2")
 
+    if not meal_sections:
+        page_text = r.text.lower()
+        if "/account/login" in page_text or "challenge" in page_text or "log in" in page_text:
+            raise Exception(
+                f"Diary not accessible — session not authenticated "
+                f"(status={r.status_code}, url={r.url}). Login may have silently failed."
+            )
+        if "__next_data__" in page_text or "data-next-head" in page_text:
+            raise Exception(
+                f"Diary page is now Next.js-rendered — parser selectors are stale "
+                f"(status={r.status_code}). Parser needs updating to new markup."
+            )
+
     for section in meal_sections:
         # The meal category heading is in the first td of the header row,
         # not a nested .main-title-2 child (that would be a self-reference).

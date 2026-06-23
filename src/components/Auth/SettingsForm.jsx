@@ -8,6 +8,7 @@ export default function SettingsForm({ prefs, onSave, onClose }) {
   const [form, setForm] = useState({
     mfp_username: prefs.mfp_username || '',
     mfp_password: prefs.mfp_password || '',
+    daily_goal_calories: prefs.daily_goal_calories || 2000,
     dietary_notes: prefs.dietary_notes || '',
   });
   const [saving, setSaving] = useState(false);
@@ -93,6 +94,17 @@ export default function SettingsForm({ prefs, onSave, onClose }) {
               </button>
               {syncMsg && <p className={`text-xs ${syncMsg.startsWith('Error') ? 'text-red-400' : 'text-[#00a0d2]'}`}>{syncMsg}</p>}
             </div>
+          </div>
+
+          <div>
+            <p className="text-xs text-secondary mb-3 uppercase tracking-wider">Goals</p>
+            <Input
+              label="Daily Calorie Goal"
+              type="number"
+              value={form.daily_goal_calories}
+              onChange={(e) => setForm(f => ({ ...f, daily_goal_calories: parseInt(e.target.value) || 2000 }))}
+              placeholder="2000"
+            />
           </div>
 
           <div>

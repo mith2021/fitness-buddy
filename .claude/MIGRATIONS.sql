@@ -7,7 +7,8 @@ CREATE TABLE IF NOT EXISTS coaching_history (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 ALTER TABLE coaching_history ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "Users see own coaching" ON coaching_history
+DROP POLICY IF EXISTS "Users see own coaching" ON coaching_history;
+CREATE POLICY "Users see own coaching" ON coaching_history
   FOR ALL USING (auth.uid() = user_id);
 
 

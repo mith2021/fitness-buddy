@@ -18,8 +18,11 @@ export function useAuth() {
   };
 
   const signup = async (email, password) => {
-    const { error } = await supabase.auth.signUp({ email, password });
+    const { data, error } = await supabase.auth.signUp({ email, password });
     if (error) throw error;
+    // When email confirmation is enabled, signUp returns a user but no session.
+    // Tell the caller so the UI can prompt the user to check their inbox.
+    return { needsConfirmation: !data.session };
   };
 
   const logout = async () => {

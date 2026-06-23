@@ -8,10 +8,12 @@ export default function LoginForm({ onSubmit, isLoading = false }) {
   const [password, setPassword] = useState('');
   const [mode, setMode] = useState('login'); // 'login' or 'signup'
   const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setNotice('');
 
     if (!email || !password) {
       setError('Email and password required');
@@ -19,7 +21,12 @@ export default function LoginForm({ onSubmit, isLoading = false }) {
     }
 
     try {
-      await onSubmit(email, password, mode);
+      const result = await onSubmit(email, password, mode);
+      if (mode === 'signup' && result?.needsConfirmation) {
+        setNotice('Account created. Check your email to confirm, then sign in.');
+        setMode('login');
+        setPassword('');
+      }
     } catch (err) {
       setError(err.message);
     }
@@ -38,6 +45,7 @@ export default function LoginForm({ onSubmit, isLoading = false }) {
         </h2>
 
         {error && <div className="bg-red-900 text-red-100 p-3 rounded mb-4">{error}</div>}
+        {notice && <div className="bg-[#0e3a4a] text-[#7fd6ef] p-3 rounded mb-4">{notice}</div>}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <Input
@@ -66,7 +74,7 @@ export default function LoginForm({ onSubmit, isLoading = false }) {
         <div className="mt-4 text-center">
           <button
             type="button"
-            onClick={() => setMode(mode === 'login' ? 'signup' : 'login')}
+            onClick={() => { setMode(mode === 'login' ? 'signup' : 'login'); setError(''); setNotice(''); }}
             className="text-sm text-[#00a0d2] hover:text-[#33b5de] min-h-[44px] px-4"
           >
             {mode === 'login' ? 'Need an account?' : 'Already have an account?'}

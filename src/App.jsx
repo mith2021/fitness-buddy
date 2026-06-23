@@ -23,8 +23,8 @@ export default function App() {
   const handleAuth = async (email, password, mode) => {
     setAuthLoading(true);
     try {
-      if (mode === 'login') await login(email, password);
-      else await signup(email, password);
+      if (mode === 'login') return await login(email, password);
+      return await signup(email, password);
     } finally {
       setAuthLoading(false);
     }

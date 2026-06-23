@@ -30,7 +30,7 @@ export async function getCoachMessage(todayLogs, dailyGoal, preferences) {
       'X-Title': 'Verdict',
     },
     body: JSON.stringify({
-      model: 'anthropic/claude-sonnet-4-6',
+      model: 'openrouter/free',
       max_tokens: 100,
       messages: [{ role: 'user', content: prompt }],
     }),

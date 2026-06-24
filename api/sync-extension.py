@@ -11,18 +11,21 @@ SUPABASE_SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_KEY")
 
 class handler(BaseHTTPRequestHandler):
     def do_POST(self):
-        auth = self.headers.get("authorization", "")
-        if not auth.startswith("Bearer "):
-            self._respond(401, {"ok": False, "error": "Missing token"})
-            return
-
-        token = auth[len("Bearer "):]
-
         try:
             length = int(self.headers.get("content-length", 0))
             body = json.loads(self.rfile.read(length)) if length else {}
         except Exception:
             self._respond(400, {"ok": False, "error": "Invalid JSON"})
+            return
+
+        # Token now travels in the body so the request stays a CORS "simple
+        # request" (no Authorization header => no OPTIONS preflight).
+        token = body.get("token", "")
+        if not token:
+            auth = self.headers.get("authorization", "")
+            token = auth[len("Bearer "):] if auth.startswith("Bearer ") else ""
+        if not token:
+            self._respond(401, {"ok": False, "error": "Missing token"})
             return
 
         try:

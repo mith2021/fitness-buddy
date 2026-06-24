@@ -5,36 +5,40 @@ let debounceTimer = null;
 
 function parseDiary() {
   const entries = [];
-  const sections = document.querySelectorAll('table.main-title-2');
+  const tbody = document.querySelector('#diary-table tbody');
+  if (!tbody) return entries;
 
-  for (const section of sections) {
-    const heading = section.querySelector('td.first.alt') || section.querySelector('th');
-    const mealCategory = heading ? heading.textContent.trim() : 'Unknown';
+  let currentMeal = 'Unknown';
 
-    const tbody = section.nextElementSibling;
-    if (!tbody) continue;
-
-    const rows = tbody.querySelectorAll('tr.bottom-row');
-    for (const row of rows) {
-      const nameEl = row.querySelector('.food-name');
-      if (!nameEl) continue;
-
-      const getCol = (cls) => {
-        const el = row.querySelector(`.${cls} span`);
-        if (!el) return 0;
-        const n = parseInt(el.textContent.replace(/,/g, '').trim(), 10);
-        return isNaN(n) ? 0 : n;
-      };
-
-      entries.push({
-        meal_name: nameEl.textContent.trim(),
-        mfp_meal_category: mealCategory,
-        calories: getCol('calories'),
-        protein: getCol('protein'),
-        carbs: getCol('carbohydrates'),
-        fat: getCol('fat'),
-      });
+  for (const row of tbody.querySelectorAll('tr')) {
+    if (row.classList.contains('meal_header')) {
+      const td = row.querySelector('td.first.alt');
+      currentMeal = td ? td.textContent.trim() : 'Unknown';
+      continue;
     }
+
+    // Skip footer/total rows
+    if (row.classList.contains('bottom') || row.classList.contains('total')) continue;
+
+    const nameLink = row.querySelector('td.first.alt a');
+    if (!nameLink) continue;
+
+    const tds = row.querySelectorAll('td');
+    const getNum = (td) => {
+      if (!td) return 0;
+      const span = td.querySelector('.macro-value');
+      const n = parseInt((span ? span.textContent : td.textContent).replace(/,/g, '').trim(), 10);
+      return isNaN(n) ? 0 : n;
+    };
+
+    entries.push({
+      meal_name: nameLink.textContent.trim(),
+      mfp_meal_category: currentMeal,
+      calories: getNum(tds[1]),
+      carbs: getNum(tds[2]),
+      fat: getNum(tds[3]),
+      protein: getNum(tds[4]),
+    });
   }
 
   return entries;
@@ -55,11 +59,9 @@ async function syncToVerdict() {
   try {
     const res = await fetch(VERDICT_API, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${verdictToken}`,
-      },
-      body: JSON.stringify({ entries, date }),
+      // text/plain keeps this a CORS "simple request" — no OPTIONS preflight.
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ token: verdictToken, entries, date }),
     });
 
     const data = await res.json();
@@ -93,6 +95,5 @@ const observer = new MutationObserver((mutations) => {
   if (relevant) debouncedSync();
 });
 
-// Observe the main diary container
-const diaryContainer = document.querySelector('#diary-table') || document.querySelector('main') || document.body;
+const diaryContainer = document.querySelector('#diary-table') || document.body;
 observer.observe(diaryContainer, { childList: true, subtree: true });

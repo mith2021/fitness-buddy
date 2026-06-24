@@ -23,11 +23,8 @@ saveBtn.addEventListener('click', async () => {
     setStatus('Verifying…', '');
     const res = await fetch('https://fitness-buddy-iota.vercel.app/api/sync-extension', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify({ entries: [], date: new Date().toISOString().split('T')[0], ping: true }),
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ token, ping: true }),
     });
     const data = await res.json();
     if (!res.ok && !data.ok) throw new Error(data.error || res.status);

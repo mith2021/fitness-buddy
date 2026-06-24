@@ -7,42 +7,52 @@ import Card from '../UI/Card';
 export default function SettingsForm({ prefs, onSave, onClose }) {
   const [form, setForm] = useState({
     mfp_username: prefs.mfp_username || '',
-    mfp_password: prefs.mfp_password || '',
     daily_goal_calories: prefs.daily_goal_calories || 2000,
     dietary_notes: prefs.dietary_notes || '',
   });
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState(null);
-  const [syncing, setSyncing] = useState(false);
-  const [syncMsg, setSyncMsg] = useState(null);
+
+  const [tokenLoading, setTokenLoading] = useState(false);
+  const [extensionToken, setExtensionToken] = useState(null);
+  const [tokenCopied, setTokenCopied] = useState(false);
 
   const set = (key) => (e) => setForm(f => ({ ...f, [key]: e.target.value }));
 
-  const handleSync = async () => {
-    setSyncing(true);
-    setSyncMsg(null);
+  const generateToken = async () => {
+    setTokenLoading(true);
+    setExtensionToken(null);
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      const res = await fetch('/api/sync-user', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session?.access_token || ''}`,
-        },
-      });
-      const text = await res.text();
-      let json;
-      try { json = JSON.parse(text); } catch { json = null; }
-      if (res.ok && json?.ok) {
-        setSyncMsg(`Synced ${json.synced} items! Refresh to see meals.`);
-      } else {
-        setSyncMsg(`Error: ${json?.error || text.slice(0, 200)}`);
-      }
+      const userId = session?.user?.id;
+      if (!userId) throw new Error('Not logged in');
+
+      // Generate a random token
+      const token = Array.from(crypto.getRandomValues(new Uint8Array(32)))
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('');
+
+      // Upsert — one token per user (replace old)
+      await supabase.from('extension_tokens')
+        .delete()
+        .eq('user_id', userId);
+
+      const { error: insertErr } = await supabase.from('extension_tokens')
+        .insert({ user_id: userId, token });
+
+      if (insertErr) throw insertErr;
+      setExtensionToken(token);
     } catch (e) {
-      setSyncMsg(`Error: ${e.message}`);
+      setError(e.message);
     }
-    setSyncing(false);
+    setTokenLoading(false);
+  };
+
+  const copyToken = () => {
+    navigator.clipboard.writeText(extensionToken);
+    setTokenCopied(true);
+    setTimeout(() => setTokenCopied(false), 2000);
   };
 
   const handleSave = async () => {
@@ -51,7 +61,6 @@ export default function SettingsForm({ prefs, onSave, onClose }) {
     const { error: saveError } = await onSave(form);
     setSaving(false);
     if (saveError) {
-      console.error('Save failed:', saveError);
       setError(saveError.message || 'Save failed');
     } else {
       setSaved(true);
@@ -61,41 +70,54 @@ export default function SettingsForm({ prefs, onSave, onClose }) {
 
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-md max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold text-white">Settings</h2>
           <button onClick={onClose} className="text-secondary hover:text-white text-xl">✕</button>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-6">
+          {/* MFP Extension Sync */}
           <div>
-            <p className="text-xs text-secondary mb-3 uppercase tracking-wider">MyFitnessPal</p>
-            <div className="space-y-3">
-              <Input
-                label="MFP Username"
-                value={form.mfp_username}
-                onChange={set('mfp_username')}
-                placeholder="your_mfp_username"
-              />
-              <Input
-                label="MFP Password"
-                type="password"
-                value={form.mfp_password}
-                onChange={set('mfp_password')}
-                placeholder="••••••••"
-              />
-              <p className="text-xs text-secondary">Auto-syncs every 2h. Disable 2FA on MFP.</p>
-              <button
-                onClick={handleSync}
-                disabled={syncing}
-                className="btn-primary text-sm px-4 py-2 w-full"
-              >
-                {syncing ? 'Syncing...' : 'Sync Now'}
-              </button>
-              {syncMsg && <p className={`text-xs ${syncMsg.startsWith('Error') ? 'text-red-400' : 'text-[#00a0d2]'}`}>{syncMsg}</p>}
+            <p className="text-xs text-secondary mb-1 uppercase tracking-wider">MyFitnessPal Sync</p>
+            <p className="text-xs text-secondary mb-3">
+              Install the Verdict Chrome extension, then paste your pairing token into it.
+              The extension syncs your diary automatically as you log food on MFP.
+            </p>
+            <Input
+              label="MFP Username"
+              value={form.mfp_username}
+              onChange={set('mfp_username')}
+              placeholder="your_mfp_username"
+            />
+            <div className="mt-3">
+              <p className="text-xs text-secondary mb-2">Pairing token (extension auth)</p>
+              {extensionToken ? (
+                <div className="space-y-2">
+                  <div className="bg-[#0a1628] border border-[#1e3a5f] rounded px-3 py-2 font-mono text-xs text-[#7fd6ef] break-all">
+                    {extensionToken}
+                  </div>
+                  <button
+                    onClick={copyToken}
+                    className="btn-primary text-xs px-3 py-1.5 w-full"
+                  >
+                    {tokenCopied ? 'Copied!' : 'Copy Token'}
+                  </button>
+                  <p className="text-xs text-secondary">Paste this into the extension popup. Token expires when you regenerate.</p>
+                </div>
+              ) : (
+                <button
+                  onClick={generateToken}
+                  disabled={tokenLoading}
+                  className="btn-primary text-sm px-4 py-2 w-full"
+                >
+                  {tokenLoading ? 'Generating...' : 'Generate Pairing Token'}
+                </button>
+              )}
             </div>
           </div>
 
+          {/* Goals */}
           <div>
             <p className="text-xs text-secondary mb-3 uppercase tracking-wider">Goals</p>
             <Input
@@ -107,6 +129,7 @@ export default function SettingsForm({ prefs, onSave, onClose }) {
             />
           </div>
 
+          {/* Coach Notes */}
           <div>
             <p className="text-xs text-secondary mb-3 uppercase tracking-wider">Coach Notes</p>
             <textarea

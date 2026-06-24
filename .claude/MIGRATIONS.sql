@@ -30,3 +30,15 @@ ALTER TABLE food_logs
 ALTER TABLE food_logs
   ADD CONSTRAINT food_logs_upsert_key
   UNIQUE (user_id, meal_name, logged_at);
+
+-- Extension pairing tokens (Chrome extension auth)
+CREATE TABLE IF NOT EXISTS extension_tokens (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  token TEXT NOT NULL UNIQUE,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+ALTER TABLE extension_tokens ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Users manage own extension tokens" ON extension_tokens;
+CREATE POLICY "Users manage own extension tokens" ON extension_tokens
+  FOR ALL USING (auth.uid() = user_id);

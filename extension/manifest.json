@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "Verdict MFP Sync",
+  "version": "1.0.0",
+  "description": "Syncs your MyFitnessPal diary to Verdict in real time.",
+  "permissions": ["storage", "alarms"],
+  "host_permissions": [
+    "https://www.myfitnesspal.com/*",
+    "https://fitness-buddy-tau.vercel.app/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.myfitnesspal.com/food/diary/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Verdict MFP Sync"
+  },
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  }
+}

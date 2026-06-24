@@ -46,3 +46,10 @@ ALTER TABLE extension_tokens ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Users manage own extension tokens" ON extension_tokens;
 CREATE POLICY "Users manage own extension tokens" ON extension_tokens
   FOR ALL USING (auth.uid() = user_id);
+
+-- Add scraped MFP bio fields to user_preferences (for TDEE/macro advice)
+ALTER TABLE user_preferences
+  ADD COLUMN IF NOT EXISTS weight_kg NUMERIC,
+  ADD COLUMN IF NOT EXISTS height_cm NUMERIC,
+  ADD COLUMN IF NOT EXISTS age INT,
+  ADD COLUMN IF NOT EXISTS gender TEXT;

@@ -11,6 +11,10 @@ DROP POLICY IF EXISTS "Users see own coaching" ON coaching_history;
 CREATE POLICY "Users see own coaching" ON coaching_history
   FOR ALL USING (auth.uid() = user_id);
 
+-- role distinguishes auto/assistant coaching from user chat turns
+ALTER TABLE coaching_history
+  ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'assistant';
+
 
 
 -- Add MFP fields to user_preferences

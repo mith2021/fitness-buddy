@@ -1,11 +1,14 @@
 const VERDICT_API = 'https://fitness-buddy-iota.vercel.app/api/sync-extension';
 const DEBOUNCE_MS = 2000;
+const POLL_MS = 60000; // re-fetch diary every 60s to catch edits made on other devices
 
 let debounceTimer = null;
+let lastSyncedHash = null;
 
-function parseDiary() {
+// Parse a diary document (live page OR a fetched HTML doc) into entries.
+function parseDiaryDoc(doc) {
   const entries = [];
-  const tbody = document.querySelector('#diary-table tbody');
+  const tbody = doc.querySelector('#diary-table tbody');
   if (!tbody) return entries;
 
   let currentMeal = 'Unknown';
@@ -49,12 +52,13 @@ function getDateFromUrl() {
   return params.get('date') || new Date().toISOString().split('T')[0];
 }
 
-async function syncToVerdict() {
+async function pushEntries(entries, date) {
   const { verdictToken } = await chrome.storage.sync.get('verdictToken');
   if (!verdictToken) return;
 
-  const entries = parseDiary();
-  const date = getDateFromUrl();
+  // Skip the network round-trip if nothing changed since the last sync.
+  const hash = JSON.stringify(entries) + date;
+  if (hash === lastSyncedHash) return;
 
   try {
     const res = await fetch(VERDICT_API, {
@@ -68,6 +72,7 @@ async function syncToVerdict() {
     if (!res.ok) {
       console.warn('[Verdict] Sync failed:', data.error);
     } else {
+      lastSyncedHash = hash;
       console.log(`[Verdict] Synced ${data.synced} entries for ${date}`);
     }
   } catch (err) {
@@ -75,25 +80,54 @@ async function syncToVerdict() {
   }
 }
 
-function debouncedSync() {
+// Sync from the live DOM (fast path for edits in this tab).
+function syncFromLiveDOM() {
+  pushEntries(parseDiaryDoc(document), getDateFromUrl());
+}
+
+// Re-fetch the current diary URL same-origin (carries the user's cookies and
+// real browser fingerprint, so Cloudflare lets it through) and sync. This is
+// what catches food logged on the phone app without a manual page reload.
+async function syncFromFetch() {
+  try {
+    const res = await fetch(window.location.href, {
+      credentials: 'include',
+      headers: { 'X-Requested-With': 'XMLHttpRequest' },
+    });
+    if (!res.ok) {
+      console.warn('[Verdict] Diary re-fetch failed:', res.status);
+      return;
+    }
+    const html = await res.text();
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    pushEntries(parseDiaryDoc(doc), getDateFromUrl());
+  } catch (err) {
+    console.warn('[Verdict] Re-fetch error:', err.message);
+  }
+}
+
+function debouncedLiveSync() {
   clearTimeout(debounceTimer);
-  debounceTimer = setTimeout(syncToVerdict, DEBOUNCE_MS);
+  debounceTimer = setTimeout(syncFromLiveDOM, DEBOUNCE_MS);
 }
 
 // Initial sync on page load
-syncToVerdict();
+syncFromLiveDOM();
 
-// Watch for DOM changes (user adds/removes food)
+// Watch for DOM changes (food added/removed in this tab)
 const observer = new MutationObserver((mutations) => {
   const relevant = mutations.some((m) =>
     [...m.addedNodes, ...m.removedNodes].some(
-      (n) => n.nodeType === 1 && (
-        n.matches?.('tr') || n.querySelector?.('tr.bottom-row')
-      )
+      (n) => n.nodeType === 1 && (n.matches?.('tr') || n.querySelector?.('tr'))
     )
   );
-  if (relevant) debouncedSync();
+  if (relevant) debouncedLiveSync();
 });
 
 const diaryContainer = document.querySelector('#diary-table') || document.body;
 observer.observe(diaryContainer, { childList: true, subtree: true });
+
+// Poll for cross-device edits (only while the tab is visible, to save battery).
+setInterval(() => {
+  if (document.visibilityState === 'visible') syncFromFetch();
+}, POLL_MS);

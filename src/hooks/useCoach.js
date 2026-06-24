@@ -1,10 +1,11 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
-import { getCoachMessage } from '../lib/openrouter';
+import { getCoachMessage, chatWithCoach } from '../lib/openrouter';
 
 export function useCoach(userId, logs, prefs) {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [sending, setSending] = useState(false);
   const prevLogCount = useRef(0);
 
   // Load today's coaching history
@@ -21,7 +22,7 @@ export function useCoach(userId, logs, prefs) {
       .then(({ data }) => setMessages(data || []));
   }, [userId]);
 
-  // Trigger coach when new meals appear
+  // Auto-coach when new meals appear
   useEffect(() => {
     if (!userId || !prefs || logs.length === 0) return;
     if (!prefs.mfp_username) return;
@@ -34,7 +35,7 @@ export function useCoach(userId, logs, prefs) {
         const message = await getCoachMessage(logs, prefs.daily_goal_calories, prefs);
         const { data } = await supabase
           .from('coaching_history')
-          .insert({ user_id: userId, coach_message: message })
+          .insert({ user_id: userId, coach_message: message, role: 'assistant' })
           .select()
           .single();
         if (data) setMessages(prev => [...prev, data]);
@@ -48,5 +49,44 @@ export function useCoach(userId, logs, prefs) {
     trigger();
   }, [logs.length, userId, prefs?.daily_goal_calories, prefs?.dietary_notes, prefs?.mfp_username]);
 
-  return { messages, loading };
+  // User asks the coach a question
+  const sendMessage = useCallback(async (text) => {
+    if (!userId || !text.trim() || sending) return;
+    setSending(true);
+
+    // Persist + optimistically show the user's message
+    const { data: userMsg } = await supabase
+      .from('coaching_history')
+      .insert({ user_id: userId, coach_message: text.trim(), role: 'user' })
+      .select()
+      .single();
+
+    const history = [...messages, userMsg].map(m => ({
+      role: m.role === 'user' ? 'user' : 'assistant',
+      content: m.coach_message,
+    }));
+    setMessages(prev => [...prev, userMsg]);
+
+    try {
+      const reply = await chatWithCoach(history, logs, prefs?.daily_goal_calories, prefs);
+      const { data: botMsg } = await supabase
+        .from('coaching_history')
+        .insert({ user_id: userId, coach_message: reply, role: 'assistant' })
+        .select()
+        .single();
+      if (botMsg) setMessages(prev => [...prev, botMsg]);
+    } catch (e) {
+      console.error('Chat error:', e);
+      setMessages(prev => [...prev, {
+        id: `err-${Date.now()}`,
+        role: 'assistant',
+        coach_message: "Couldn't reach the coach. Try again.",
+        created_at: new Date().toISOString(),
+      }]);
+    } finally {
+      setSending(false);
+    }
+  }, [userId, messages, logs, prefs, sending]);
+
+  return { messages, loading, sending, sendMessage };
 }

@@ -18,7 +18,7 @@ export default function App() {
 
   const { logs, totalCalories, totalProtein, totalCarbs, totalFat } = useFoodLog(user?.id);
   const { prefs, save: savePrefs } = usePreferences(user?.id);
-  const { messages, loading: coachLoading } = useCoach(user?.id, logs, prefs);
+  const { messages, loading: coachLoading, sending, sendMessage } = useCoach(user?.id, logs, prefs);
 
   const handleAuth = async (email, password, mode) => {
     setAuthLoading(true);
@@ -40,7 +40,7 @@ export default function App() {
 
   if (!user) return <LoginForm onSubmit={handleAuth} isLoading={authLoading} />;
 
-  const noMfpCreds = !prefs.mfp_username || !prefs.mfp_password;
+  const noMfpCreds = !prefs.mfp_username;
 
   return (
     <div className="min-h-screen bg-[#0d1b2a]">
@@ -53,9 +53,9 @@ export default function App() {
             onClick={() => setShowSettings(true)}
           >
             <p className="text-white text-lg font-semibold">Connect MyFitnessPal</p>
-            <p className="text-gray-400 text-sm mt-1">Sync your meals automatically every 2 hours</p>
+            <p className="text-gray-400 text-sm mt-1">Install the Verdict extension and pair it to sync your meals automatically</p>
             <button className="mt-3 btn-primary text-sm px-4 py-2 rounded-full">
-              Connect Now →
+              Set Up →
             </button>
           </div>
         )}
@@ -68,7 +68,7 @@ export default function App() {
           totalFat={totalFat}
         />
 
-        <CoachFeed messages={messages} loading={coachLoading} />
+        <CoachFeed messages={messages} loading={coachLoading} sending={sending} onSend={sendMessage} />
 
         <MealList logs={logs} />
       </main>

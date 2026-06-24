@@ -49,7 +49,9 @@ class handler(BaseHTTPRequestHandler):
 
             entries = body.get("entries", [])
             date_str = body.get("date") or datetime.utcnow().date().isoformat()
-            logged_at = f"{date_str}T00:00:00"
+            # Noon UTC lands on the same calendar date for every timezone, so the
+            # app's local-midnight gte() filter shows it on the right day.
+            logged_at = f"{date_str}T12:00:00+00:00"
 
             synced = 0
             for entry in entries:

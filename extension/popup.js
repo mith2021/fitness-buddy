@@ -21,7 +21,7 @@ saveBtn.addEventListener('click', async () => {
   try {
     saveBtn.disabled = true;
     setStatus('Verifying…', '');
-    const res = await fetch('https://fitness-buddy-tau.vercel.app/api/sync-extension', {
+    const res = await fetch('https://fitness-buddy-iota.vercel.app/api/sync-extension', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

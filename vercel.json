@@ -1,9 +1,13 @@
 {
+  "alias": ["fitness-buddy-iota.vercel.app"],
   "functions": {
     "api/sync-mfp.py": {
       "runtime": "@vercel/python@4.3.1"
     },
     "api/sync-user.py": {
+      "runtime": "@vercel/python@4.3.1"
+    },
+    "api/sync-extension.py": {
       "runtime": "@vercel/python@4.3.1"
     }
   },

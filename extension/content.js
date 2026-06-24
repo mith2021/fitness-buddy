@@ -1,4 +1,4 @@
-const VERDICT_API = 'https://fitness-buddy-tau.vercel.app/api/sync-extension';
+const VERDICT_API = 'https://fitness-buddy-iota.vercel.app/api/sync-extension';
 const DEBOUNCE_MS = 2000;
 
 let debounceTimer = null;
